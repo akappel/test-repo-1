@@ -1,0 +1,42 @@
+#!/bin/bash
+shopt -s extglob
+version_prefix="0.0"
+container_name=${bamboo_CONTAINER_NAME:-$bamboo_shortPlanName}
+sep="."
+branch="$bamboo_planRepository_1_branch"
+case $branch in
+dev?(elop))
+        semantic=true
+        pre='dev'
+        ;;
+master)
+        semantic=false
+        ;;
+story/*|bugfix/*|feature/*)
+        semantic=true
+        if [[ $branch =~ ((story)|(bugfix)|(feature))/([A-Z]+-[0-9]+).* ]] ; then
+                pre="${BASH_REMATCH[5]}"
+        fi
+        ;;
+esac
+if semantic=true; then
+        version_prefix="${version_prefix}-${pre}"
+        sep="."   # Docker doesn't support proper semver yet, so this is set to . instead of +
+fi
+
+prefix="$version_prefix"
+version="${prefix}${sep}${bamboo_buildNumber}"
+tag="$bamboo_dtr_url/$bamboo_dtr_org/$container_name:$version"
+echo "Building $container_name version: $version"
+#generate the local properties
+cat > LOCALPROPS <<EOF
+version.prefix=$prefix
+version=$version
+tag=$tag
+EOF
+#generate inherited properties (this will be used in later steps by bamboo)
+cat > PROPERTIES <<EOF
+$container_name.version.prefix=$prefix
+$container_name.version=$version
+$container_name.tag=$tag
+EOF
