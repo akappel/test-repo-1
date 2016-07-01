@@ -1,4 +1,2 @@
 #!/bin/bash
-shopt -s extglob
-
 echo hello
