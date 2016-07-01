@@ -1,4 +1,4 @@
 #!/bin/bash
 shopt -s extglob
-version_prefix="0.0"
-container_name=${bamboo_CONTAINER_NAME:-$bamboo_shortPlanName}
+
+echo hello
